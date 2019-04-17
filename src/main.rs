@@ -22,11 +22,13 @@ struct JsonResponse {
     result: i32
 }
 
+// root handler
 #[get("/")]
 fn index() -> &'static str {
     "Hello, world!"
 }
 
+// increments and displays a number from our global state
 #[get("/count")]
 fn count(state_hit_count: State<HitCount>) -> String {
     state_hit_count.0.fetch_add(1, Ordering::Relaxed);
@@ -34,18 +36,21 @@ fn count(state_hit_count: State<HitCount>) -> String {
     format!("Number of visits: {}", hit_count)
 }
 
+// sets a cookie on the client's browser
 #[get("/cookie/add/<value>")]
 fn cookie_add(mut cookies: Cookies, value: String) -> String {
     cookies.add(Cookie::new("value", value.clone()));
     format!("Cookie sent: '{}'", value)
 }
 
+// retrieves the cookie set above
 #[get("/cookie/get")]
 fn cookie_get(cookies: Cookies) -> Option<String> {
     cookies.get("value")
         .map(|value| format!("Cookie received: '{}'", value))
 }
 
+// receives a json post, sends another json as response
 #[post("/json", format = "json", data = "<request>")]
 fn json(request: Json<JsonRequest>) -> Option<Json<JsonResponse>> {
     Some(Json(JsonResponse {
